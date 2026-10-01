@@ -135,3 +135,43 @@ class LoginSerializer(serializers.Serializer):
         attrs["user"] = user
 
         return attrs
+
+
+class ResendVerificationSerializer(serializers.Serializer):
+    request_id = serializers.CharField()
+
+    def validate(self, attrs):
+        request_id = attrs["request_id"]
+
+        try:
+            verification = (
+                PhoneNumberVerification.objects
+                .select_related("user")
+                .get(
+                    request_id=request_id,
+                    is_active=True,
+                )
+            )
+        except PhoneNumberVerification.DoesNotExist:
+            raise serializers.ValidationError(
+                "Invalid or inactive verification request."
+            )
+
+        telegram = TelegramGatewayService()
+
+        result = telegram.send_verification_code(
+            phone_number=verification.user.phone_number,
+        )
+
+        verification.is_active = False
+        verification.save(update_fields=["is_active"])
+
+        new_verification = PhoneNumberVerification.objects.create(
+            user=verification.user,
+            request_id=result["request_id"],
+            expires_at=timezone.now() + timezone.timedelta(seconds=300),
+        )
+
+        attrs["verification"] = new_verification
+
+        return attrs

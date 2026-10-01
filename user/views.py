@@ -8,6 +8,7 @@ from .serializers import (
     RegisterSerializer,
     VerifySerializer,
     LoginSerializer,
+    ResendVerificationSerializer,
 )
 
 
@@ -76,6 +77,28 @@ class LoginView(GenericAPIView):
         return Response(
             {
                 "message": "Login successful.",
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class ResendVerificationView(GenericAPIView):
+    serializer_class = ResendVerificationSerializer
+
+    def post(self, request):
+        serializer = self.get_serializer(
+            data=request.data,
+        )
+
+        serializer.is_valid(raise_exception=True)
+
+        verification = serializer.validated_data["verification"]
+
+        return Response(
+            {
+                "message": "Verification code resent.",
+                "request_id": verification.request_id,
+                "redirect_url": "/api/auth/verify/",
             },
             status=status.HTTP_200_OK,
         )
