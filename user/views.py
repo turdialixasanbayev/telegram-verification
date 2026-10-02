@@ -32,7 +32,6 @@ class RegisterView(GenericAPIView):
             {
                 "message": "Verification code sent.",
                 "request_id": verification.request_id,
-                "redirect_url": "/api/v1/auth/verify/",
             },
             status=status.HTTP_201_CREATED,
         )
@@ -51,7 +50,6 @@ class VerifyView(GenericAPIView):
         return Response(
             {
                 "message": "Phone number verified successfully.",
-                "redirect_url": "/api/v1/auth/login/",
             },
             status=status.HTTP_200_OK,
         )
@@ -98,7 +96,6 @@ class ResendVerificationView(GenericAPIView):
             {
                 "message": "Verification code resent.",
                 "request_id": verification.request_id,
-                "redirect_url": "/api/auth/verify/",
             },
             status=status.HTTP_200_OK,
         )
