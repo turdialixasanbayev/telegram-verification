@@ -1,0 +1,9 @@
+services:
+  web:
+    build: .
+    container_name: telegram-verification
+    image: telegram-verification
+    ports:
+      - "7171:7171"
+    env_file:
+      - .env
